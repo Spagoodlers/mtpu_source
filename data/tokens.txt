@@ -1,0 +1,10 @@
+Soldier
+Goblin
+Zombie
+Spirit
+Elemental
+Wolf
+Bird
+Insect
+Saproling
+Treasure

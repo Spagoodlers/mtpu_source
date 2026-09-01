@@ -14,7 +14,8 @@ def get_random_card_image_by_cmc(cmc, card_type):
     exclude_query = " ".join([f"-set:{set_code}" for set_code in exclude_sets])
 
     url = f"https://api.scryfall.com/cards/random?q=type:{card_type}+cmc:{cmc}+{exclude_query}"
-    response = requests.get(url)
+    headers = {'User-Agent': 'MTPU/1.0 (Magic Thermal Printing Utility)'}
+    response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
         data = response.json()
@@ -24,7 +25,8 @@ def get_random_card_image_by_cmc(cmc, card_type):
 
 
 def download_image(image_url):
-    response = requests.get(image_url)
+    headers = {'User-Agent': 'MTPU/1.0 (Magic Thermal Printing Utility)'}
+    response = requests.get(image_url, headers=headers)
     if response.status_code == 200:
         os.makedirs(TEMP_FOLDER, exist_ok=True)
         with open(os.path.join(TEMP_FOLDER, TEMP_FILE_NAME), "wb") as f:

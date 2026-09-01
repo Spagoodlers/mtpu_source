@@ -6,6 +6,7 @@ import subprocess
 from tkinter import messagebox
 from tkinter import ttk
 import importlib
+import win32print
 
 # Get the parent directory of the current script (app_gui.py)
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -94,11 +95,43 @@ def create_and_configure_app():
     # Load and add buttons for scripts in the "utilities" folder
     utilities_folder = "utilities"
     for file_name in os.listdir(utilities_folder):
-        if file_name.endswith(".py") and file_name != "__init__.py":
+        if file_name.endswith(".py") and file_name != "__init__.py" and file_name != "printer_config.py":
             script_name = os.path.splitext(file_name)[0]
             button = tk.Button(app, text=script_name.capitalize(), bg="black", fg="white",
                                command=lambda script=script_name: load_and_execute_script(script))
             button.pack()
+
+    # Printer cycle button in corner
+    def cycle_printer():
+        try:
+            printers = win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS)
+            printer_names = [printer[2] for printer in printers]
+            current = win32print.GetDefaultPrinter()
+            
+            if current in printer_names:
+                current_index = printer_names.index(current)
+                next_index = (current_index + 1) % len(printer_names)
+                next_printer = printer_names[next_index]
+                win32print.SetDefaultPrinter(next_printer)
+                output_label.config(text=f"Printer: {next_printer}")
+            else:
+                win32print.SetDefaultPrinter(printer_names[0])
+                output_label.config(text=f"Printer: {printer_names[0]}")
+        except Exception as e:
+            output_label.config(text=f"Error: {e}")
+
+    printer_icon_path = "image/icon/printer.png"
+    if os.path.exists(printer_icon_path):
+        printer_icon = Image.open(printer_icon_path)
+        printer_icon = printer_icon.resize((24, 24))
+        printer_icon_photo = ImageTk.PhotoImage(printer_icon)
+        printer_button = tk.Button(app, image=printer_icon_photo, bg="black", 
+                                  command=cycle_printer, bd=0, highlightthickness=0)
+        printer_button.image = printer_icon_photo
+    else:
+        printer_button = tk.Button(app, text="", bg="black", fg="white", font=("Arial", 16),
+                                  command=cycle_printer, bd=0, highlightthickness=0)
+    printer_button.place(x=240, y=10)
 
     # Output Label
     global output_label
